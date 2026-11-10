@@ -1,0 +1,8 @@
+include(HiSDK)
+mipk_require_hisdk()
+add_library(mipk_platform_hisilicon OBJECT mipk_platform_hisilicon.c)
+add_library(mipk::platform_hisilicon ALIAS mipk_platform_hisilicon)
+target_link_libraries(mipk_platform_hisilicon PUBLIC mipk::core_headers mipk::hisdk)
+target_include_directories(mipk_platform_hisilicon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_options(mipk_platform_hisilicon PRIVATE ${MIPK_WARNING_FLAGS})
+set_target_properties(mipk_platform_hisilicon PROPERTIES POSITION_INDEPENDENT_CODE ON)

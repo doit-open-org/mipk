@@ -1,0 +1,109 @@
+{
+  "module": "tfmicrofrontend",
+  "register": "mipk_tfmicrofrontend_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "tfmicrofrontend",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "audio"
+      ],
+      "options": {
+        "window_ms": {
+          "type": "int",
+          "min": 1,
+          "default": 30
+        },
+        "step_ms": {
+          "type": "int",
+          "min": 1,
+          "default": 10
+        },
+        "feature_channels": {
+          "type": "int",
+          "min": 1,
+          "required": true
+        },
+        "feature_frames": {
+          "type": "int",
+          "min": 1,
+          "required": true
+        },
+        "inference_stride": {
+          "type": "int",
+          "min": 1,
+          "default": 1
+        },
+        "input_index": {
+          "type": "int",
+          "min": 0,
+          "default": 0
+        },
+        "lower_band_hz": {
+          "type": "number",
+          "default": 125
+        },
+        "upper_band_hz": {
+          "type": "number",
+          "default": 7500
+        },
+        "noise_smoothing_bits": {
+          "type": "int",
+          "default": 10
+        },
+        "noise_even_smoothing": {
+          "type": "number",
+          "default": 0.025
+        },
+        "noise_odd_smoothing": {
+          "type": "number",
+          "default": 0.06
+        },
+        "noise_min_signal_remaining": {
+          "type": "number",
+          "default": 0.05
+        },
+        "pcan": {
+          "type": "bool",
+          "default": true
+        },
+        "pcan_strength": {
+          "type": "number",
+          "default": 0.95
+        },
+        "pcan_offset": {
+          "type": "number",
+          "default": 80
+        },
+        "pcan_gain_bits": {
+          "type": "int",
+          "default": 21
+        },
+        "log_scale": {
+          "type": "bool",
+          "default": true
+        },
+        "log_scale_shift": {
+          "type": "int",
+          "default": 6
+        },
+        "output_scale": {
+          "type": "number",
+          "default": 0.0390625
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "time_major",
+            "feature_major"
+          ],
+          "default": "time_major"
+        }
+      },
+      "output": "tensors",
+      "compat_version": "2.0.0"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "name": "keypoints",
+  "description": "Dense keypoint regression on a single crop (PFLD-style)",
+  "params": {
+    "model": {
+      "type": "file",
+      "required": true,
+      "help": "model file, copied next to the manifest"
+    },
+    "backend": {
+      "type": "string",
+      "default": "onnxruntime",
+      "help": "backend module name"
+    },
+    "labels": {
+      "type": "labels",
+      "default": [
+        "face"
+      ]
+    },
+    "input_format": {
+      "type": "string",
+      "default": "rgb",
+      "enum": [
+        "rgb",
+        "bgr",
+        "nv12",
+        "nv21"
+      ],
+      "help": "what the application feeds"
+    },
+    "preprocess_format": {
+      "type": "string",
+      "default": "float",
+      "enum": [
+        "float",
+        "nv12",
+        "auto"
+      ],
+      "help": "float for ONNX-style models, nv12 for .om with AIPP"
+    },
+    "size": {
+      "type": "int",
+      "default": 112,
+      "help": "model input size (square)"
+    },
+    "input_width": {
+      "type": "int",
+      "default": "${size}",
+      "help": "frame width the application feeds"
+    },
+    "input_height": {
+      "type": "int",
+      "default": "${size}",
+      "help": "frame height the application feeds"
+    },
+    "point_count": {
+      "type": "int",
+      "default": 98
+    },
+    "values_per_keypoint": {
+      "type": "int",
+      "default": 2
+    },
+    "coordinates": {
+      "type": "string",
+      "default": "normalized",
+      "enum": [
+        "normalized",
+        "pixels"
+      ]
+    },
+    "output_order": {
+      "type": "string",
+      "default": "bgr",
+      "enum": [
+        "rgb",
+        "bgr"
+      ]
+    }
+  },
+  "manifest": {
+    "format_version": 2,
+    "schema": "mipk.unified_pipeline.v2",
+    "task": {
+      "result_types": [
+        "keypoint"
+      ],
+      "result_capacity": "${point_count}"
+    },
+    "models": [
+      {
+        "id": "landmark",
+        "backend": "${backend}",
+        "file": "${model}"
+      }
+    ],
+    "input": {
+      "format": "${input_format}",
+      "width": "${input_width}",
+      "height": "${input_height}"
+    },
+    "pipeline": [
+      {
+        "type": "operator",
+        "operator": "image_preprocess",
+        "mode": "stretch",
+        "target_width": "${size}",
+        "target_height": "${size}",
+        "format": "${preprocess_format}",
+        "output_order": "${output_order}",
+        "scale": 0.00392156862745098,
+        "inputs": {
+          "input": "$input"
+        },
+        "output": "model_input"
+      },
+      {
+        "type": "model",
+        "model": "landmark",
+        "inputs": {
+          "0": "model_input"
+        },
+        "output": "model_output"
+      },
+      {
+        "type": "postprocess",
+        "postprocess": "keypoints",
+        "output_index": 0,
+        "point_count": "${point_count}",
+        "values_per_keypoint": "${values_per_keypoint}",
+        "coordinates": "${coordinates}",
+        "class_id": 0,
+        "inputs": {
+          "tensors": "model_output"
+        },
+        "output": "keypoints",
+        "label_set": "labels"
+      }
+    ],
+    "output": "$last",
+    "label_sets": {
+      "labels": "${labels}"
+    }
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "name": "microwakeword",
+  "description": "MicroWakeWord: 16 kHz PCM, TF MicroFrontend features, streaming classifier",
+  "params": {
+    "model": {
+      "type": "file",
+      "required": true
+    },
+    "backend": {
+      "type": "string",
+      "default": "onnxruntime"
+    },
+    "labels": {
+      "type": "labels",
+      "required": true,
+      "help": "wake word names, one per output class"
+    },
+    "result_capacity": {
+      "type": "int",
+      "default": 1,
+      "help": "wake events reported per frame"
+    },
+    "class_output_indices": {
+      "type": "json",
+      "default": [
+        0
+      ],
+      "help": "model output index for each wake word, in label order"
+    },
+    "feature_channels": {
+      "type": "int",
+      "default": 40
+    },
+    "feature_frames": {
+      "type": "int",
+      "default": 204
+    },
+    "inference_stride": {
+      "type": "int",
+      "default": 3
+    },
+    "score_threshold": {
+      "type": "number",
+      "default": 0.8
+    },
+    "smoothing_window": {
+      "type": "int",
+      "default": 5,
+      "help": "frames averaged before the threshold"
+    },
+    "confirmation_hits": {
+      "type": "int",
+      "default": 2
+    },
+    "confirmation_gaps": {
+      "type": "int",
+      "default": 2
+    },
+    "cooldown_ms": {
+      "type": "int",
+      "default": 2000
+    }
+  },
+  "manifest": {
+    "format_version": 2,
+    "schema": "mipk.unified_pipeline.v2",
+    "task": {
+      "result_types": [
+        "classification"
+      ],
+      "result_capacity": "${result_capacity}"
+    },
+    "models": [
+      {
+        "id": "classifier",
+        "backend": "${backend}",
+        "file": "${model}"
+      }
+    ],
+    "input": {
+      "format": "pcm_s16le",
+      "sample_rate": 16000,
+      "channels": 1,
+      "frame_samples": 160,
+      "reset_gap_ms": 2000
+    },
+    "pipeline": [
+      {
+        "type": "operator",
+        "operator": "tfmicrofrontend",
+        "window_ms": 30,
+        "step_ms": 10,
+        "feature_channels": "${feature_channels}",
+        "feature_frames": "${feature_frames}",
+        "inference_stride": "${inference_stride}",
+        "lower_band_hz": 125,
+        "upper_band_hz": 7500,
+        "noise_smoothing_bits": 10,
+        "noise_even_smoothing": 0.025,
+        "noise_odd_smoothing": 0.06,
+        "noise_min_signal_remaining": 0.05,
+        "pcan": true,
+        "pcan_strength": 0.95,
+        "pcan_offset": 80,
+        "pcan_gain_bits": 21,
+        "log_scale": true,
+        "log_scale_shift": 6,
+        "output_scale": 0.0390625,
+        "layout": "time_major",
+        "inputs": {
+          "audio": "$input"
+        },
+        "output": "model_input"
+      },
+      {
+        "type": "model",
+        "model": "classifier",
+        "inputs": {
+          "0": "model_input"
+        },
+        "output": "model_output"
+      },
+      {
+        "type": "postprocess",
+        "postprocess": "microwakeword",
+        "output_index": 0,
+        "transform": "probability",
+        "class_output_indices": "${class_output_indices}",
+        "inputs": {
+          "tensors": "model_output"
+        },
+        "output": "scores",
+        "label_set": "labels"
+      },
+      {
+        "type": "operator",
+        "operator": "wake_word_trigger",
+        "score_threshold": "${score_threshold}",
+        "smoothing": "mean",
+        "smoothing_window": "${smoothing_window}",
+        "confirmation_hits": "${confirmation_hits}",
+        "confirmation_gaps": "${confirmation_gaps}",
+        "cooldown_ms": "${cooldown_ms}",
+        "inputs": {
+          "scores": "scores"
+        },
+        "output": "wake_word"
+      }
+    ],
+    "output": "$last",
+    "label_sets": {
+      "labels": "${labels}"
+    }
+  }
+}

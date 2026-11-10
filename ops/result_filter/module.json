@@ -1,0 +1,49 @@
+{
+  "module": "result_filter",
+  "register": "mipk_result_filter_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "result_filter",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "results"
+      ],
+      "options": {
+        "class_allowlist": {
+          "type": "array",
+          "items": "string",
+          "default": []
+        },
+        "score_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1
+        },
+        "top_k": {
+          "type": "int",
+          "min": 1,
+          "required": true
+        },
+        "max_items": {
+          "type": "int",
+          "min": 1,
+          "required": true,
+          "max": "result_capacity"
+        }
+      },
+      "output": "results",
+      "result_types": "inherit:results",
+      "constraints": [
+        {
+          "le": [
+            "top_k",
+            "max_items"
+          ]
+        }
+      ],
+      "compat_version": "2.0.0"
+    }
+  ]
+}

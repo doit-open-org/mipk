@@ -1,0 +1,63 @@
+{
+  "module": "wake_word_trigger",
+  "register": "mipk_wake_word_trigger_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "wake_word_trigger",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "scores"
+      ],
+      "options": {
+        "score_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "default": 0.8
+        },
+        "smoothing": {
+          "type": "string",
+          "enum": [
+            "none",
+            "mean",
+            "max"
+          ],
+          "default": "mean"
+        },
+        "smoothing_window": {
+          "type": "int",
+          "min": 1,
+          "default": 5
+        },
+        "confirmation_hits": {
+          "type": "int",
+          "min": 1,
+          "default": 1
+        },
+        "confirmation_gaps": {
+          "type": "int",
+          "min": 0,
+          "default": 0
+        },
+        "cooldown_ms": {
+          "type": "int",
+          "min": 0,
+          "default": 2000
+        }
+      },
+      "output": "results",
+      "result_types": [
+        "classification"
+      ],
+      "accepts": {
+        "scores": [
+          "classification"
+        ]
+      },
+      "stateful": true,
+      "compat_version": "2.0.0"
+    }
+  ]
+}

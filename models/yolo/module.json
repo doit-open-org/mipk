@@ -1,0 +1,56 @@
+{
+  "module": "yolo",
+  "register": "mipk_yolo_register",
+  "capabilities": [
+    {
+      "kind": "postprocess",
+      "name": "yolo",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "tensors"
+      ],
+      "options": {
+        "output_index": {
+          "type": "int",
+          "min": 0,
+          "default": 0
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "attributes_first",
+            "candidates_first"
+          ],
+          "default": "auto"
+        },
+        "has_objectness": {
+          "type": "bool",
+          "default": false
+        },
+        "score_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "default": 0.4
+        },
+        "max_candidates": {
+          "type": "int",
+          "min": 0,
+          "default": 10000
+        },
+        "max_results": {
+          "type": "int",
+          "min": 1,
+          "max": "result_capacity"
+        }
+      },
+      "output": "results",
+      "result_types": [
+        "detection"
+      ],
+      "compat_version": "2.0.0"
+    }
+  ]
+}

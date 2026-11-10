@@ -1,0 +1,98 @@
+{
+  "module": "image_preprocess",
+  "register": "mipk_image_preprocess_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "image_preprocess",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "input"
+      ],
+      "options": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "stretch",
+            "letterbox"
+          ],
+          "default": "stretch"
+        },
+        "target_width": {
+          "type": "int",
+          "min": 1
+        },
+        "target_height": {
+          "type": "int",
+          "min": 1
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "nv12",
+            "float"
+          ],
+          "default": "auto"
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "nchw"
+          ],
+          "default": "nchw"
+        },
+        "input_order": {
+          "type": "string",
+          "enum": [
+            "rgb",
+            "bgr"
+          ]
+        },
+        "output_order": {
+          "type": "string",
+          "enum": [
+            "rgb",
+            "bgr"
+          ]
+        },
+        "mean": {
+          "type": "number_or_array",
+          "length": 3,
+          "default": 0
+        },
+        "scale": {
+          "type": "number_or_array",
+          "length": 3,
+          "default": 1
+        },
+        "letterbox_value": {
+          "type": "number",
+          "min": 0,
+          "max": 255,
+          "default": 114
+        },
+        "interpolation": {
+          "type": "string",
+          "enum": [
+            "bilinear",
+            "nearest"
+          ],
+          "default": "bilinear",
+          "help": "float output only; NV12 output is always a direct copy"
+        }
+      },
+      "output": "tensors",
+      "constraints": [
+        {
+          "together": [
+            "target_width",
+            "target_height"
+          ]
+        }
+      ],
+      "compat_version": "2.0.0"
+    }
+  ]
+}

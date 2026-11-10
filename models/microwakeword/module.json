@@ -1,0 +1,41 @@
+{
+  "module": "microwakeword",
+  "register": "mipk_microwakeword_register",
+  "capabilities": [
+    {
+      "kind": "postprocess",
+      "name": "microwakeword",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "tensors"
+      ],
+      "options": {
+        "output_index": {
+          "type": "int",
+          "min": 0,
+          "default": 0
+        },
+        "transform": {
+          "type": "string",
+          "enum": [
+            "probability",
+            "sigmoid",
+            "softmax"
+          ],
+          "default": "probability"
+        },
+        "class_output_indices": {
+          "type": "array",
+          "items": "int",
+          "unique": true
+        }
+      },
+      "output": "results",
+      "result_types": [
+        "classification"
+      ],
+      "compat_version": "2.0.0"
+    }
+  ]
+}

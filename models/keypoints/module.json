@@ -1,0 +1,58 @@
+{
+  "module": "keypoints",
+  "register": "mipk_keypoints_register",
+  "capabilities": [
+    {
+      "kind": "postprocess",
+      "name": "keypoints",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "tensors"
+      ],
+      "options": {
+        "output_index": {
+          "type": "int",
+          "min": 0,
+          "default": 0
+        },
+        "point_count": {
+          "type": "int",
+          "min": 1,
+          "max": "result_capacity",
+          "required": true
+        },
+        "values_per_keypoint": {
+          "type": "int",
+          "min": 2,
+          "max": 3,
+          "default": 2
+        },
+        "coordinates": {
+          "type": "string",
+          "enum": [
+            "normalized",
+            "pixels"
+          ],
+          "default": "normalized"
+        },
+        "class_id": {
+          "type": "int",
+          "min": 0,
+          "default": 0
+        },
+        "instance_id": {
+          "type": "int",
+          "min": 0,
+          "default": 0
+        }
+      },
+      "output": "results",
+      "result_types": [
+        "keypoint"
+      ],
+      "result_bound_option": "point_count",
+      "compat_version": "2.0.0"
+    }
+  ]
+}

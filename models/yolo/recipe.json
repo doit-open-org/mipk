@@ -1,0 +1,210 @@
+{
+  "name": "yolo",
+  "description": "Ultralytics YOLO detection (v5/v8/v11 head without built-in NMS)",
+  "params": {
+    "model": {
+      "type": "file",
+      "required": true,
+      "help": "model file, copied next to the manifest"
+    },
+    "backend": {
+      "type": "string",
+      "default": "onnxruntime",
+      "help": "backend module name"
+    },
+    "labels": {
+      "type": "labels",
+      "required": true,
+      "help": "class names, a file with one per line or a comma list"
+    },
+    "input_format": {
+      "type": "string",
+      "default": "rgb",
+      "enum": [
+        "rgb",
+        "bgr",
+        "nv12",
+        "nv21"
+      ],
+      "help": "what the application feeds"
+    },
+    "preprocess_format": {
+      "type": "string",
+      "default": "float",
+      "enum": [
+        "float",
+        "nv12",
+        "auto"
+      ],
+      "help": "float for ONNX-style models, nv12 for .om with AIPP"
+    },
+    "size": {
+      "type": "int",
+      "default": 640,
+      "help": "model input size (square)"
+    },
+    "model_width": {
+      "type": "int",
+      "default": "${size}",
+      "help": "model input width"
+    },
+    "model_height": {
+      "type": "int",
+      "default": "${size}",
+      "help": "model input height"
+    },
+    "input_width": {
+      "type": "int",
+      "default": "${model_width}",
+      "help": "frame width the application feeds"
+    },
+    "input_height": {
+      "type": "int",
+      "default": "${model_height}",
+      "help": "frame height the application feeds"
+    },
+    "score_threshold": {
+      "type": "number",
+      "default": 0.25
+    },
+    "iou_threshold": {
+      "type": "number",
+      "default": 0.45
+    },
+    "max_results": {
+      "type": "int",
+      "default": 100
+    },
+    "has_objectness": {
+      "type": "bool",
+      "default": false,
+      "help": "true for YOLOv5-style heads"
+    },
+    "layout": {
+      "type": "string",
+      "default": "auto",
+      "enum": [
+        "auto",
+        "attributes_first",
+        "candidates_first"
+      ]
+    },
+    "max_candidates": {
+      "type": "int",
+      "derive": {
+        "fn": "yolo_anchors",
+        "args": [
+          "model_width",
+          "model_height"
+        ]
+      },
+      "help": "anchors the head emits; derived from size"
+    },
+    "track": {
+      "type": "bool",
+      "default": false,
+      "help": "append a ByteTrack stage"
+    }
+  },
+  "manifest": {
+    "format_version": 2,
+    "schema": "mipk.unified_pipeline.v2",
+    "task": {
+      "result_types": {
+        "derive": {
+          "fn": "yolo_result_types",
+          "args": [
+            "track"
+          ]
+        }
+      },
+      "result_capacity": "${max_results}"
+    },
+    "models": [
+      {
+        "id": "detector",
+        "backend": "${backend}",
+        "file": "${model}"
+      }
+    ],
+    "input": {
+      "format": "${input_format}",
+      "width": "${input_width}",
+      "height": "${input_height}"
+    },
+    "pipeline": [
+      {
+        "type": "operator",
+        "operator": "image_preprocess",
+        "mode": "letterbox",
+        "target_width": "${model_width}",
+        "target_height": "${model_height}",
+        "format": "${preprocess_format}",
+        "output_order": "rgb",
+        "scale": 0.00392156862745098,
+        "inputs": {
+          "input": "$input"
+        },
+        "output": "model_input"
+      },
+      {
+        "type": "model",
+        "model": "detector",
+        "inputs": {
+          "0": "model_input"
+        },
+        "output": "model_output"
+      },
+      {
+        "type": "postprocess",
+        "postprocess": "yolo",
+        "output_index": 0,
+        "layout": "${layout}",
+        "has_objectness": "${has_objectness}",
+        "score_threshold": "${score_threshold}",
+        "max_candidates": "${max_candidates}",
+        "inputs": {
+          "tensors": "model_output"
+        },
+        "output": "candidates",
+        "label_set": "labels"
+      },
+      {
+        "type": "operator",
+        "operator": "nms",
+        "iou_threshold": "${iou_threshold}",
+        "class_agnostic": false,
+        "max_results": "${max_results}",
+        "inputs": {
+          "results": "candidates"
+        },
+        "output": "detections"
+      },
+      {
+        "$if": "track",
+        "type": "operator",
+        "operator": "bytetrack",
+        "track_high_threshold": 0.5,
+        "track_low_threshold": 0.1,
+        "new_track_threshold": 0.6,
+        "min_match_iou": 0.2,
+        "lost_timeout_ms": 1000,
+        "max_prediction_dt_ms": 200,
+        "reset_gap_ms": 2000,
+        "class_aware": true,
+        "max_tracks": "${max_results}",
+        "emit_lost": false,
+        "emit_removed": false,
+        "inputs": {
+          "frame": "$input",
+          "detections": "detections"
+        },
+        "output": "tracks"
+      }
+    ],
+    "output": "$last",
+    "label_sets": {
+      "labels": "${labels}"
+    }
+  }
+}

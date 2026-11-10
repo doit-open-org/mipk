@@ -1,0 +1,13 @@
+{
+  "module": "svp_acl",
+  "register": "mipk_svp_acl_register",
+  "capabilities": [
+    {
+      "kind": "backend",
+      "name": "svp_acl",
+      "abi_version": 1,
+      "implementation_version": "2.0.0",
+      "compat_version": "2.0.0"
+    }
+  ]
+}

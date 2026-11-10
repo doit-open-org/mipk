@@ -1,0 +1,14 @@
+build/
+_build/
+__pycache__/
+*.pyc
+third_party/onnxruntime/
+examples/host/models/**/*.onnx
+examples/host/models/**/*.mipk
+!examples/host/models/**/recipe.json
+*.mipk
+*.pt
+out/
+
+# Host tests stay local and are not tracked.
+tests/

@@ -1,0 +1,78 @@
+{
+  "format_version": 2,
+  "schema": "mipk.unified_pipeline.v2",
+  "name": "yolo11n",
+  "version": "1.0.0",
+  "task": {
+    "result_types": [
+      "detection"
+    ]
+  },
+  "models": [
+    {
+      "id": "detector",
+      "backend": "onnxruntime",
+      "file": "yolo11n.onnx"
+    }
+  ],
+  "input": {
+    "format": "rgb",
+    "width": 640,
+    "height": 640
+  },
+  "label_sets": {
+    "labels": {
+      "file": "coco80.txt"
+    }
+  },
+  "pipeline": [
+    {
+      "type": "operator",
+      "operator": "image_preprocess",
+      "mode": "letterbox",
+      "target_width": 640,
+      "target_height": 640,
+      "format": "float",
+      "output_order": "rgb",
+      "scale": 0.00392156862745098,
+      "inputs": {
+        "input": "$input"
+      },
+      "output": "model_input"
+    },
+    {
+      "type": "model",
+      "model": "detector",
+      "inputs": {
+        "0": "model_input"
+      },
+      "output": "model_output"
+    },
+    {
+      "type": "postprocess",
+      "postprocess": "yolo",
+      "label_set": "labels",
+      "output_index": 0,
+      "layout": "auto",
+      "has_objectness": false,
+      "score_threshold": 0.25,
+      "max_candidates": 8400,
+      "inputs": {
+        "tensors": "model_output"
+      },
+      "output": "candidates"
+    },
+    {
+      "type": "operator",
+      "operator": "nms",
+      "iou_threshold": 0.45,
+      "class_agnostic": false,
+      "max_results": 100,
+      "inputs": {
+        "results": "candidates"
+      },
+      "output": "detections"
+    }
+  ],
+  "output": "detections"
+}

@@ -1,0 +1,41 @@
+{
+  "module": "nms",
+  "register": "mipk_nms_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "nms",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "results"
+      ],
+      "options": {
+        "iou_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "required": true
+        },
+        "class_agnostic": {
+          "type": "bool",
+          "required": true
+        },
+        "max_results": {
+          "type": "int",
+          "min": 1,
+          "required": true,
+          "max": "result_capacity"
+        }
+      },
+      "output": "results",
+      "result_types": "inherit:results",
+      "accepts": {
+        "results": [
+          "detection"
+        ]
+      },
+      "compat_version": "2.0.0"
+    }
+  ]
+}

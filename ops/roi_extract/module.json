@@ -1,0 +1,41 @@
+{
+  "module": "roi_extract",
+  "register": "mipk_roi_extract_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "roi_extract",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "frame",
+        "results"
+      ],
+      "options": {
+        "max_items": {
+          "type": "int",
+          "min": 1,
+          "required": true
+        },
+        "scale": {
+          "type": "number",
+          "min": 1,
+          "default": 1
+        },
+        "square": {
+          "type": "bool",
+          "default": false
+        },
+        "min_size": {
+          "type": "number",
+          "exclusive_min": 0,
+          "default": 1
+        }
+      },
+      "output": "collection",
+      "collection_item": "image_view",
+      "collection_bound_option": "max_items",
+      "compat_version": "2.0.0"
+    }
+  ]
+}

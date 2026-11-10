@@ -1,0 +1,5 @@
+{
+  "recipe": "yolo",
+  "model": "yolo11n.onnx",
+  "labels": "coco80.txt"
+}

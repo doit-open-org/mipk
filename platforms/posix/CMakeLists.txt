@@ -1,0 +1,6 @@
+add_library(mipk_platform_posix OBJECT mipk_platform_posix.c)
+add_library(mipk::platform_posix ALIAS mipk_platform_posix)
+target_link_libraries(mipk_platform_posix PUBLIC mipk::core_headers)
+target_include_directories(mipk_platform_posix PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_options(mipk_platform_posix PRIVATE ${MIPK_WARNING_FLAGS})
+set_target_properties(mipk_platform_posix PROPERTIES POSITION_INDEPENDENT_CODE ON)

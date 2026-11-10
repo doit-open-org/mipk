@@ -1,0 +1,154 @@
+{
+  "name": "classification",
+  "description": "Single-label image classification (ImageNet-style normalisation)",
+  "params": {
+    "model": {
+      "type": "file",
+      "required": true,
+      "help": "model file, copied next to the manifest"
+    },
+    "backend": {
+      "type": "string",
+      "default": "onnxruntime",
+      "help": "backend module name"
+    },
+    "labels": {
+      "type": "labels",
+      "required": true,
+      "help": "class names, a file with one per line or a comma list"
+    },
+    "input_format": {
+      "type": "string",
+      "default": "rgb",
+      "enum": [
+        "rgb",
+        "bgr",
+        "nv12",
+        "nv21"
+      ],
+      "help": "what the application feeds"
+    },
+    "preprocess_format": {
+      "type": "string",
+      "default": "float",
+      "enum": [
+        "float",
+        "nv12",
+        "auto"
+      ],
+      "help": "float for ONNX-style models, nv12 for .om with AIPP"
+    },
+    "size": {
+      "type": "int",
+      "default": 224,
+      "help": "model input size (square)"
+    },
+    "input_width": {
+      "type": "int",
+      "default": "${size}",
+      "help": "frame width the application feeds"
+    },
+    "input_height": {
+      "type": "int",
+      "default": "${size}",
+      "help": "frame height the application feeds"
+    },
+    "mean": {
+      "type": "json",
+      "default": [
+        123.675,
+        116.28,
+        103.53
+      ]
+    },
+    "scale": {
+      "type": "json",
+      "default": [
+        0.01712475,
+        0.017507,
+        0.01742919
+      ]
+    },
+    "transform": {
+      "type": "string",
+      "default": "softmax",
+      "enum": [
+        "probability",
+        "sigmoid",
+        "softmax"
+      ]
+    },
+    "top_k": {
+      "type": "int",
+      "default": 5
+    },
+    "score_threshold": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "manifest": {
+    "format_version": 2,
+    "schema": "mipk.unified_pipeline.v2",
+    "task": {
+      "result_types": [
+        "classification"
+      ],
+      "result_capacity": "${top_k}"
+    },
+    "models": [
+      {
+        "id": "classifier",
+        "backend": "${backend}",
+        "file": "${model}"
+      }
+    ],
+    "input": {
+      "format": "${input_format}",
+      "width": "${input_width}",
+      "height": "${input_height}"
+    },
+    "pipeline": [
+      {
+        "type": "operator",
+        "operator": "image_preprocess",
+        "mode": "stretch",
+        "target_width": "${size}",
+        "target_height": "${size}",
+        "format": "${preprocess_format}",
+        "output_order": "rgb",
+        "mean": "${mean}",
+        "scale": "${scale}",
+        "inputs": {
+          "input": "$input"
+        },
+        "output": "model_input"
+      },
+      {
+        "type": "model",
+        "model": "classifier",
+        "inputs": {
+          "0": "model_input"
+        },
+        "output": "model_output"
+      },
+      {
+        "type": "postprocess",
+        "postprocess": "classification",
+        "output_index": 0,
+        "transform": "${transform}",
+        "top_k": "${top_k}",
+        "score_threshold": "${score_threshold}",
+        "inputs": {
+          "tensors": "model_output"
+        },
+        "output": "classifications",
+        "label_set": "labels"
+      }
+    ],
+    "output": "$last",
+    "label_sets": {
+      "labels": "${labels}"
+    }
+  }
+}

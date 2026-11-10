@@ -1,0 +1,13 @@
+mipk
+Copyright 2025-2026 doit-open-org contributors
+
+This product bundles the following third-party code:
+
+- cJSON (third_party/cjson) — MIT License
+- kissfft (third_party/kissfft) — BSD-3-Clause
+- TensorFlow Lite MicroFrontend (third_party/tensorflow) — Apache License 2.0
+- stb_image, stb_image_write (third_party/stb) — MIT License / public domain
+
+Prebuilt onnxruntime binaries fetched by scripts/fetch_onnxruntime.sh are
+distributed by Microsoft under the MIT License and are not part of this
+repository.

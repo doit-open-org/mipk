@@ -1,0 +1,169 @@
+{
+  "name": "yolo_pose",
+  "description": "Ultralytics YOLO pose head (boxes plus keypoints)",
+  "params": {
+    "model": {
+      "type": "file",
+      "required": true,
+      "help": "model file, copied next to the manifest"
+    },
+    "backend": {
+      "type": "string",
+      "default": "onnxruntime",
+      "help": "backend module name"
+    },
+    "labels": {
+      "type": "labels",
+      "default": [
+        "person"
+      ]
+    },
+    "input_format": {
+      "type": "string",
+      "default": "rgb",
+      "enum": [
+        "rgb",
+        "bgr",
+        "nv12",
+        "nv21"
+      ],
+      "help": "what the application feeds"
+    },
+    "preprocess_format": {
+      "type": "string",
+      "default": "float",
+      "enum": [
+        "float",
+        "nv12",
+        "auto"
+      ],
+      "help": "float for ONNX-style models, nv12 for .om with AIPP"
+    },
+    "size": {
+      "type": "int",
+      "default": 640,
+      "help": "model input size (square)"
+    },
+    "model_width": {
+      "type": "int",
+      "default": "${size}",
+      "help": "model input width"
+    },
+    "model_height": {
+      "type": "int",
+      "default": "${size}",
+      "help": "model input height"
+    },
+    "input_width": {
+      "type": "int",
+      "default": "${model_width}",
+      "help": "frame width the application feeds"
+    },
+    "input_height": {
+      "type": "int",
+      "default": "${model_height}",
+      "help": "frame height the application feeds"
+    },
+    "keypoint_count": {
+      "type": "int",
+      "default": 17
+    },
+    "score_threshold": {
+      "type": "number",
+      "default": 0.5
+    },
+    "iou_threshold": {
+      "type": "number",
+      "default": 0.45
+    },
+    "max_results": {
+      "type": "int",
+      "default": 10,
+      "help": "objects per frame"
+    },
+    "max_candidates": {
+      "type": "int",
+      "derive": {
+        "fn": "yolo_anchors",
+        "args": [
+          "model_width",
+          "model_height"
+        ]
+      }
+    }
+  },
+  "manifest": {
+    "format_version": 2,
+    "schema": "mipk.unified_pipeline.v2",
+    "task": {
+      "result_types": [
+        "detection",
+        "keypoint"
+      ],
+      "result_capacity": {
+        "derive": {
+          "fn": "pose_capacity",
+          "args": [
+            "max_results",
+            "keypoint_count"
+          ]
+        }
+      }
+    },
+    "models": [
+      {
+        "id": "pose",
+        "backend": "${backend}",
+        "file": "${model}"
+      }
+    ],
+    "input": {
+      "format": "${input_format}",
+      "width": "${input_width}",
+      "height": "${input_height}"
+    },
+    "pipeline": [
+      {
+        "type": "operator",
+        "operator": "image_preprocess",
+        "mode": "letterbox",
+        "target_width": "${model_width}",
+        "target_height": "${model_height}",
+        "format": "${preprocess_format}",
+        "output_order": "rgb",
+        "scale": 0.00392156862745098,
+        "inputs": {
+          "input": "$input"
+        },
+        "output": "model_input"
+      },
+      {
+        "type": "model",
+        "model": "pose",
+        "inputs": {
+          "0": "model_input"
+        },
+        "output": "model_output"
+      },
+      {
+        "type": "postprocess",
+        "postprocess": "yolo_pose",
+        "output_index": 0,
+        "keypoint_count": "${keypoint_count}",
+        "score_threshold": "${score_threshold}",
+        "iou_threshold": "${iou_threshold}",
+        "max_results": "${max_results}",
+        "max_candidates": "${max_candidates}",
+        "inputs": {
+          "tensors": "model_output"
+        },
+        "output": "poses",
+        "label_set": "labels"
+      }
+    ],
+    "output": "$last",
+    "label_sets": {
+      "labels": "${labels}"
+    }
+  }
+}

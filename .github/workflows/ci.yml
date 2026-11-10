@@ -1,0 +1,21 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  host:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - run: pip install onnx numpy
+      - run: scripts/fetch_onnxruntime.sh
+      - name: Generated docs are current
+        run: python3 tools/gen_module_docs.py --check
+      - name: Configure (all modules)
+        run: >
+          cmake -S . -B build -G Ninja
+          -DMIPK_OPS_AUDIO=ON -DMIPK_MODEL_YOLO=ON -DMIPK_MODEL_YOLO_POSE=ON
+          -DMIPK_MODEL_CLASSIFICATION=ON -DMIPK_MODEL_KEYPOINTS=ON
+          -DMIPK_MODEL_MICROWAKEWORD=ON -DMIPK_BACKEND_ONNXRUNTIME=ON
+      - run: cmake --build build
+      - name: Build matrix
+        run: MIPK_MATRIX_DIR=$RUNNER_TEMP/matrix scripts/build_matrix.sh -k

@@ -1,0 +1,101 @@
+{
+  "module": "bytetrack",
+  "register": "mipk_bytetrack_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "bytetrack",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "frame",
+        "detections"
+      ],
+      "options": {
+        "track_high_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "required": true
+        },
+        "track_low_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "required": true
+        },
+        "new_track_threshold": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "required": true
+        },
+        "min_match_iou": {
+          "type": "number",
+          "min": 0,
+          "max": 1,
+          "required": true
+        },
+        "lost_timeout_ms": {
+          "type": "number",
+          "exclusive_min": 0,
+          "required": true
+        },
+        "max_prediction_dt_ms": {
+          "type": "number",
+          "exclusive_min": 0,
+          "required": true
+        },
+        "reset_gap_ms": {
+          "type": "number",
+          "exclusive_min": 0,
+          "required": true
+        },
+        "class_aware": {
+          "type": "bool",
+          "required": true
+        },
+        "max_tracks": {
+          "type": "int",
+          "min": 1,
+          "max": "result_capacity",
+          "required": true
+        },
+        "emit_lost": {
+          "type": "bool",
+          "required": true
+        },
+        "emit_removed": {
+          "type": "bool",
+          "required": true
+        }
+      },
+      "output": "results",
+      "result_types": [
+        "track"
+      ],
+      "accepts": {
+        "detections": [
+          "detection"
+        ]
+      },
+      "stateful": true,
+      "constraints": [
+        {
+          "order": [
+            "track_low_threshold",
+            "track_high_threshold",
+            "new_track_threshold"
+          ]
+        },
+        {
+          "le": [
+            "max_prediction_dt_ms",
+            "reset_gap_ms"
+          ]
+        }
+      ],
+      "compat_version": "2.0.0"
+    }
+  ]
+}

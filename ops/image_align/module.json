@@ -1,0 +1,52 @@
+{
+  "module": "image_align",
+  "register": "mipk_image_align_register",
+  "capabilities": [
+    {
+      "kind": "operator",
+      "name": "image_align",
+      "abi_version": 2,
+      "implementation_version": "2.0.0",
+      "inputs": [
+        "image",
+        "landmarks"
+      ],
+      "options": {
+        "max_items": {
+          "type": "int",
+          "min": 1
+        },
+        "output_width": {
+          "type": "int",
+          "min": 1,
+          "required": true
+        },
+        "output_height": {
+          "type": "int",
+          "min": 1,
+          "required": true
+        },
+        "point_ids": {
+          "type": "array",
+          "items": "int",
+          "length": 3,
+          "unique": true,
+          "required": true
+        },
+        "target_points": {
+          "type": "array",
+          "items": "point",
+          "length": 3,
+          "required": true
+        },
+        "min_score": {
+          "type": "number",
+          "min": 0,
+          "max": 1
+        }
+      },
+      "output": "image_view",
+      "compat_version": "2.0.0"
+    }
+  ]
+}
